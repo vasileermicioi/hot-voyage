@@ -19,21 +19,22 @@ Critical decisions for agents working in this repo. Read this before changing co
 
 ## Commands
 
-| Task             | Command                          |
-| ---------------- | -------------------------------- |
-| Install          | `bun install`                    |
-| Dev              | `bun run dev`                    |
-| Typecheck        | `bun run typecheck`              |
-| Lint             | `bun run lint`                   |
-| Format           | `bun run format`                 |
-| Tests            | `bun test`                       |
-| E2E smoke        | `bun run e2e` (needs preview up) |
-| Build            | `bun run build`                  |
-| Preview          | `bun run preview`                |
-| DB generate      | `bun run db:generate`            |
-| DB migrate local | `bun run db:migrate:local`       |
-| Deploy dry-run   | `bun run cf:deploy:dry`          |
-| Bootstrap local  | `bun scripts/bootstrap-dev.ts`   |
+| Task              | Command                                                                        |
+| ----------------- | ------------------------------------------------------------------------------ |
+| Install           | `bun install`                                                                  |
+| Dev               | `bun run dev`                                                                  |
+| Typecheck         | `bun run typecheck`                                                            |
+| Lint              | `bun run lint`                                                                 |
+| Format            | `bun run format`                                                               |
+| Tests             | `bun test`                                                                     |
+| E2E smoke         | `bun run e2e` (needs preview up)                                               |
+| Build             | `bun run build`                                                                |
+| Build (remote DB) | `bun run build:remote` (migrates remote D1, then builds; needs wrangler login) |
+| Preview           | `bun run preview`                                                              |
+| DB generate       | `bun run db:generate`                                                          |
+| DB migrate local  | `bun run db:migrate:local`                                                     |
+| Deploy dry-run    | `bun run cf:deploy:dry`                                                        |
+| Bootstrap local   | `bun scripts/bootstrap-dev.ts`                                                 |
 
 Copy `.dev.vars.example` to `.dev.vars` (gitignored) for local secrets. Never commit `.dev.vars`, `package-lock.json`, or `node_modules`.
 
@@ -56,7 +57,7 @@ Architecture docs move with code: LikeC4 (`docs/likec4/`) + `docs/architecture.m
 ## Cloudflare deploy rule
 
 - Bindings declared in `apps/web/wrangler.jsonc` for local / preview / prod (`hot-voyage-dev`, `hot-voyage-preview`, `hot-voyage-prod` DBs; dev/prod R2 buckets).
-- Local: `wrangler d1 migrations apply --local`. Remote applies documented in the launch step. Dry-run gate: `bun run cf:deploy:dry` must show workers + d1 + r2 bindings.
+- Local: `wrangler d1 migrations apply --local`. Remote: `bun run build:remote` migrates the remote D1 before every build (dashboard build command); one-time `wrangler d1 create` + id paste stays manual. Dry-run gate: `bun run cf:deploy:dry` must show workers + d1 + r2 bindings.
 
 ## Definition of done
 

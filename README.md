@@ -30,6 +30,7 @@ bun run dev                                         # http://localhost:4321
 | Tests             | `bun test`                       |
 | E2E smoke         | `bun run e2e` (needs preview up) |
 | Build             | `bun run build`                  |
+| Build (remote DB) | `bun run build:remote`           |
 | Preview           | `bun run preview`                |
 | DB generate       | `bun run db:generate`            |
 | DB migrate local  | `bun run db:migrate:local`       |
@@ -70,9 +71,13 @@ the database exists. Run once from a machine logged into the right account
 ```sh
 cd apps/web && bunx wrangler d1 create hot-voyage-dev   # copy database_id
 # paste database_id into the top-level d1_databases entry in apps/web/wrangler.jsonc
-bun run db:migrate:remote   # create tables in the remote DB (from repo root)
 git add apps/web/wrangler.jsonc && git commit -m "chore: set remote hot-voyage-dev D1 id" && git push
 ```
+
+Schema migration runs automatically from then on: the dashboard **build
+command** is `bun run build:remote`, which applies `db:migrate:remote`
+(remote D1) before `bun run build`, on every deploy. Local `bun run build`
+stays credential-free.
 
 The dashboard build then redeploys green. The remote catalog starts empty
 (local seed never touches prod) — content arrives via the step-03 admin.

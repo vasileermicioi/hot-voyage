@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "bun --filter hot-voyage-web dev",
     "build": "bun --filter hot-voyage-web build",
+    "build:remote": "bun run db:migrate:remote && bun run build",
     "preview": "bun --filter hot-voyage-web preview",
     "lint": "bunx @biomejs/biome@2.6.3 check .",
     "typecheck": "bun --filter '*' typecheck",
