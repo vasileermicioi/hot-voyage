@@ -1,0 +1,29 @@
+{
+  "name": "hot-voyage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Hot Voyage — touristic tours website for hot offers (Bun workspaces monorepo)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun --filter hot-voyage-web dev",
+    "build": "bun --filter hot-voyage-web build",
+    "preview": "bun --filter hot-voyage-web preview",
+    "lint": "bunx @biomejs/biome@2.6.3 check .",
+    "typecheck": "bun --filter '*' typecheck",
+    "format": "bunx @biomejs/biome@2.6.3 check --write .",
+    "format:check": "bunx @biomejs/biome@2.6.3 check .",
+    "test": "bun test",
+    "e2e": "bun e2e/smoke.ts",
+    "db:generate": "bun --filter @hot-voyage/db db:generate",
+    "db:migrate:local": "bun --filter @hot-voyage/db db:migrate:local",
+    "cf:deploy:dry": "bun --filter hot-voyage-web cf:deploy:dry"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.3",
+    "bun-types": "1.4.4",
+    "typescript": "5.9.2"
+  }
+}

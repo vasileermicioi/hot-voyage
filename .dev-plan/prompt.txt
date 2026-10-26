@@ -1,0 +1,18 @@
+Create one or more openspec proposals according to `.dev-plan/openspec_5step_proposals_guide.v3.md` for:
+
+```
+I want to create a website named "Hot Voyage" for hot offers for touristic tours.
+
+Tech stack:
+- astro
+- typescript
+- drizzle orm 
+- bunjs for bundling, formatting, testing, and e2e testing
+- https://www.neobrutalism.dev/ for design, but create a design.md and change the theme for a touristic website
+- create AGENTS.md for critical decisions
+- create architecture docs in likec4 format
+- cloudflare workers and d1 and r2 for hosting database and image storage
+- use webp format and client side image resizing (from admin)   
+```
+
+Save openspec proposals as .md files in `.dev-plan/current-iteration` folder.

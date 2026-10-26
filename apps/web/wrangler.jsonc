@@ -1,0 +1,65 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Local dev uses top-level bindings; preview/prod override below.
+  // Prod D1/R2 ids are provisioned in step 04 (hot-voyage-04-launch).
+  "name": "hot-voyage",
+  "compatibility_date": "2026-10-26",
+  "compatibility_flags": ["nodejs_compat"],
+  // NOTE: no `main` field. The Cloudflare Vite plugin backing
+  // @astrojs/cloudflare throws on first build when `main` points at
+  // dist/_worker.js before it exists. The adapter emits _worker.js and a
+  // generated wrangler.json into dist/ at build time; `wrangler deploy`
+  // picks the entry up from there. Keep bindings here, not the entry.
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "hot-voyage-dev",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../packages/db/drizzle"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "hot-voyage-images-dev"
+    }
+  ],
+  "env": {
+    "preview": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "hot-voyage-preview",
+          "database_id": "00000000-0000-0000-0000-000000000001",
+          "migrations_dir": "../../packages/db/drizzle"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "IMAGES",
+          "bucket_name": "hot-voyage-images-preview"
+        }
+      ]
+    },
+    "production": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "hot-voyage-prod",
+          "database_id": "REPLACE_WITH_PROD_D1_ID_IN_STEP_04",
+          "migrations_dir": "../../packages/db/drizzle"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "IMAGES",
+          "bucket_name": "hot-voyage-images-prod"
+        }
+      ]
+    }
+  }
+}

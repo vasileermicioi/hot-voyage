@@ -1,0 +1,25 @@
+{
+  "name": "@hot-voyage/db",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply hot-voyage-dev --local --config ../../apps/web/wrangler.jsonc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261026.1",
+    "drizzle-kit": "0.31.11",
+    "typescript": "5.9.2",
+    "wrangler": "4.153.0"
+  }
+}

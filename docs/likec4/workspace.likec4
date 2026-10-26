@@ -1,0 +1,36 @@
+specification {
+  element actor
+  element system
+  element container
+  element component
+}
+
+model {
+  visitor = actor 'Visitor' 'Traveler browsing tours and hot offers'
+  siteAdmin = actor 'Site admin' 'Publishes offers and uploads WebP images from the browser'
+
+  hotVoyage = system 'Hot Voyage' 'Touristic tours website for hot offers' {
+    webApp = container 'Astro edge app' 'Astro on Cloudflare Workers, pages and /api/*' 'Astro + Cloudflare Workers'
+    database = container 'D1 database' 'Tours, offers, and inquiries storage' 'Cloudflare D1 + Drizzle'
+    objectStore = container 'R2 image store' 'WebP tour images at tours/<slug>/<width>w.<ext>' 'Cloudflare R2'
+    adminBrowser = container 'Admin browser' 'Auth-gated studio: CRUD, client-side WebP resize, upload' 'Astro islands'
+
+    webApp -> database 'queries via @hot-voyage/db' 'D1 binding DB'
+    webApp -> objectStore 'serves WebP images' 'R2 binding IMAGES'
+    adminBrowser -> webApp 'CRUD and uploads via server endpoints' 'HTTPS'
+  }
+
+  visitor -> hotVoyage 'browses tours and hot offers'
+  siteAdmin -> hotVoyage 'publishes offers'
+}
+
+views {
+  view context {
+    title 'System context'
+    include *
+  }
+  view containers of hotVoyage {
+    title 'Containers'
+    include *
+  }
+}

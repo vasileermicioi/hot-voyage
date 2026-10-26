@@ -1,0 +1,68 @@
+---
+const stack = [
+  "Astro",
+  "TypeScript",
+  "Bun",
+  "Cloudflare Workers",
+  "D1",
+  "R2",
+  "Drizzle",
+];
+---
+
+<article class="hv-card hello">
+  <span class="hv-badge">Hot offers, bold cards</span>
+  <h1 class="hello__title">Hot Voyage</h1>
+  <p class="hello__text">
+    Touristic tours with time-boxed, discounted hot offers. This hello shell proves the
+    foundation slice: toolchain, edge bindings, and theme tokens.
+  </p>
+  <ul class="hello__stack">
+    {stack.map((item) => <li>{item}</li>)}
+  </ul>
+  <nav class="hello__links">
+    <a class="hv-button hv-button--sea" href="/api/health">Health</a>
+    <a class="hv-button" href="https://github.com">Docs</a>
+  </nav>
+</article>
+
+<style>
+  .hello {
+    max-width: 36rem;
+    margin: 4rem auto;
+    padding: 2rem;
+  }
+
+  .hello__title {
+    font-family: var(--hv-font-display);
+    font-size: var(--hv-type-hero);
+    margin: 1rem 0 0.5rem;
+  }
+
+  .hello__text {
+    font-size: var(--hv-type-body);
+  }
+
+  .hello__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .hello__stack li {
+    padding: 0.25rem 0.625rem;
+    font-size: var(--hv-type-small);
+    font-weight: 700;
+    background: var(--hv-sun-soft);
+    border: 2px solid var(--hv-ink);
+    border-radius: 6px;
+  }
+
+  .hello__links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+</style>

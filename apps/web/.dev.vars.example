@@ -1,0 +1,7 @@
+# Copy to `.dev.vars` (gitignored) for `wrangler dev` / `astro dev` local secrets.
+# Never commit real values.
+#
+# cp .dev.vars.example .dev.vars  (run from apps/web/)
+
+# Admin session secret for local dev only (real auth lands in step 03).
+# ADMIN_SESSION_SECRET=dev-only-change-me

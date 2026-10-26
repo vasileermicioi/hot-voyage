@@ -1,0 +1,86 @@
+:root {
+  /* Touristic neobrutalist palette: sea / sun / sand + ink. */
+  --hv-sea: #0e7c7b;
+  --hv-sea-deep: #0a5a59;
+  --hv-sun: #ffc53d;
+  --hv-sun-soft: #ffe08a;
+  --hv-sand: #fdf6e3;
+  --hv-coral: #ff6b5b;
+  --hv-ink: #1a1a1a;
+  --hv-paper: #fffdf7;
+
+  /* Neobrutalist geometry: thick borders, hard shadows, small radius. */
+  --hv-border: 3px solid var(--hv-ink);
+  --hv-shadow: 6px 6px 0 var(--hv-ink);
+  --hv-shadow-small: 3px 3px 0 var(--hv-ink);
+  --hv-radius: 8px;
+
+  --hv-font-display: "Archivo Black", "Arial Black", system-ui, sans-serif;
+  --hv-font-body: "Inter", system-ui, -apple-system, sans-serif;
+
+  --hv-type-hero: clamp(2rem, 5vw, 3.5rem);
+  --hv-type-title: 1.5rem;
+  --hv-type-body: 1rem;
+  --hv-type-small: 0.875rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--hv-font-body);
+  background: var(--hv-sand);
+  color: var(--hv-ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--hv-sea);
+  outline-offset: 2px;
+}
+
+.hv-card {
+  background: var(--hv-paper);
+  border: var(--hv-border);
+  border-radius: var(--hv-radius);
+  box-shadow: var(--hv-shadow);
+}
+
+.hv-button {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  font-weight: 700;
+  color: var(--hv-ink);
+  background: var(--hv-sun);
+  border: var(--hv-border);
+  border-radius: var(--hv-radius);
+  box-shadow: var(--hv-shadow-small);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hv-button:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+.hv-button--sea {
+  background: var(--hv-sea);
+  color: #fff;
+}
+
+.hv-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  font-size: var(--hv-type-small);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--hv-ink);
+  background: var(--hv-sun-soft);
+  border: 2px solid var(--hv-ink);
+  border-radius: 999px;
+}

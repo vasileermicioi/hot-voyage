@@ -1,0 +1,59 @@
+# Hot Voyage
+
+Touristic tours website for "hot offers" — time-boxed, discounted tours with
+bold neobrutalist cards. Runs on Cloudflare Workers + D1 + R2 with
+Astro + TypeScript + Drizzle, managed with Bun.
+
+## Prerequisites
+
+- [Bun](https://bun.sh) 1.4.x
+- [Wrangler](https://developers.cloudflare.com/workers/wrangler/) 4.x
+  (`bunx wrangler` works without a global install)
+
+## Quickstart
+
+```sh
+bun install
+cp apps/web/.dev.vars.example apps/web/.dev.vars   # local-only secrets
+bun scripts/bootstrap-dev.ts                        # local D1 + R2 stub
+bun run dev                                         # http://localhost:4321
+```
+
+## Commands
+
+| Task             | Command                          |
+| ---------------- | -------------------------------- |
+| Dev              | `bun run dev`                    |
+| Typecheck        | `bun run typecheck`              |
+| Lint             | `bun run lint`                   |
+| Format           | `bun run format`                 |
+| Tests            | `bun test`                       |
+| E2E smoke        | `bun run e2e` (needs preview up) |
+| Build            | `bun run build`                  |
+| Preview          | `bun run preview`                |
+| DB generate      | `bun run db:generate`            |
+| DB migrate local | `bun run db:migrate:local`       |
+| Deploy dry-run   | `bun run cf:deploy:dry`          |
+
+## Env setup
+
+- Local bindings are declared in `apps/web/wrangler.jsonc`
+  (`hot-voyage-dev` D1, `hot-voyage-images-dev` R2).
+- Copy `.dev.vars.example` to `.dev.vars` for local secrets (gitignored).
+- Preview/prod bindings use the `preview` / `production` envs in the same file.
+  Prod D1/R2 ids are provisioned in step 04.
+
+## Project layout
+
+```text
+apps/web/       Astro site (pages, api/*, layouts, components, styles)
+packages/db/    Drizzle client, schema, migrations (D1)
+packages/lib/   Shared domain: env/binding helpers
+scripts/        Local bootstrap (bun-runnable)
+e2e/            Preview smoke test
+docs/           design.md, architecture.md, likec4/
+openspec/       Specs and change proposals
+```
+
+Cross-workspace imports only via `@hot-voyage/db` / `@hot-voyage/lib`.
+See `AGENTS.md` for the full rule set.
