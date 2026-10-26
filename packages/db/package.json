@@ -23,6 +23,7 @@
   "scripts": {
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply hot-voyage-dev --local --config ../../apps/web/wrangler.jsonc",
+    "db:migrate:remote": "wrangler d1 migrations apply hot-voyage-dev --remote --config ../../apps/web/wrangler.jsonc",
     "db:seed:local": "bun src/seed.ts",
     "typecheck": "tsc --noEmit"
   },

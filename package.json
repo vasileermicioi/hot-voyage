@@ -19,6 +19,7 @@
     "e2e": "bun e2e/run.ts",
     "db:generate": "bun --filter @hot-voyage/db db:generate",
     "db:migrate:local": "bun --filter @hot-voyage/db db:migrate:local",
+    "db:migrate:remote": "bun --filter @hot-voyage/db db:migrate:remote",
     "db:seed:local": "bun --filter @hot-voyage/db db:seed:local",
     "cf:deploy": "bun --filter hot-voyage-web cf:deploy",
     "cf:deploy:dry": "bun --filter hot-voyage-web cf:deploy:dry"

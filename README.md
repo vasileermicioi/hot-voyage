@@ -21,19 +21,20 @@ bun run dev                                         # http://localhost:4321
 
 ## Commands
 
-| Task             | Command                          |
-| ---------------- | -------------------------------- |
-| Dev              | `bun run dev`                    |
-| Typecheck        | `bun run typecheck`              |
-| Lint             | `bun run lint`                   |
-| Format           | `bun run format`                 |
-| Tests            | `bun test`                       |
-| E2E smoke        | `bun run e2e` (needs preview up) |
-| Build            | `bun run build`                  |
-| Preview          | `bun run preview`                |
-| DB generate      | `bun run db:generate`            |
-| DB migrate local | `bun run db:migrate:local`       |
-| Deploy dry-run   | `bun run cf:deploy:dry`          |
+| Task              | Command                          |
+| ----------------- | -------------------------------- |
+| Dev               | `bun run dev`                    |
+| Typecheck         | `bun run typecheck`              |
+| Lint              | `bun run lint`                   |
+| Format            | `bun run format`                 |
+| Tests             | `bun test`                       |
+| E2E smoke         | `bun run e2e` (needs preview up) |
+| Build             | `bun run build`                  |
+| Preview           | `bun run preview`                |
+| DB generate       | `bun run db:generate`            |
+| DB migrate local  | `bun run db:migrate:local`       |
+| DB migrate remote | `bun run db:migrate:remote`      |
+| Deploy dry-run    | `bun run cf:deploy:dry`          |
 
 ## Env setup
 
@@ -58,6 +59,23 @@ bun run db:seed:local      # idempotent seed: 10 tours, 4 active hot offers
   seed explicitly — CI never seeds prod.
 - Browse: `/` (hot rail) → `/tours` (filters) → `/tours/<slug>` (detail + inquiry).
 - APIs: `GET /api/tours`, `POST /api/inquiries`, `GET /api/health`.
+
+## First remote deploy (one-time, manual)
+
+Wrangler auto-provisions KV/R2 on deploy, but **not D1**. The deploy fails
+with `D1 binding 'DB' references database '0000…' which was not found` until
+the database exists. Run once from a machine logged into the right account
+(`bunx wrangler login`):
+
+```sh
+cd apps/web && bunx wrangler d1 create hot-voyage-dev   # copy database_id
+# paste database_id into the top-level d1_databases entry in apps/web/wrangler.jsonc
+bun run db:migrate:remote   # create tables in the remote DB (from repo root)
+git add apps/web/wrangler.jsonc && git commit -m "chore: set remote hot-voyage-dev D1 id" && git push
+```
+
+The dashboard build then redeploys green. The remote catalog starts empty
+(local seed never touches prod) — content arrives via the step-03 admin.
 
 ## Project layout
 
