@@ -8,6 +8,7 @@
     "build": "astro build",
     "preview": "astro preview --port 4321",
     "typecheck": "astro check && tsc --noEmit",
+    "cf:deploy": "wrangler deploy",
     "cf:deploy:dry": "wrangler deploy --dry-run"
   },
   "dependencies": {

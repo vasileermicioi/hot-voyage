@@ -10,6 +10,13 @@
   // dist/_worker.js before it exists. The adapter emits _worker.js and a
   // generated wrangler.json into dist/ at build time; `wrangler deploy`
   // picks the entry up from there. Keep bindings here, not the entry.
+  // DEPLOY INVOCATION: run `wrangler deploy` from apps/web (or
+  // `bun run cf:deploy` from the repo root) with NO --config flag, so
+  // Wrangler follows .wrangler/deploy/config.json to the generated
+  // dist/server/wrangler.json. Passing --config explicitly disables that
+  // redirect and deploys this file as an assets-only Worker, which Wrangler
+  // rejects ("Cannot use assets with a binding in an assets-only Worker")
+  // because D1/R2 bindings are present without a Worker script.
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"
