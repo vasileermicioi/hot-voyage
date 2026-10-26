@@ -1,0 +1,43 @@
+---
+import { formatCountdown } from "@hot-voyage/lib";
+
+interface Props {
+  endsAt: number;
+  now?: number;
+}
+
+const { endsAt, now = Date.now() } = Astro.props;
+---
+
+<span class="countdown" data-countdown data-ends-at={String(endsAt)}>
+  {formatCountdown(endsAt, now)}
+</span>
+
+<script>
+  // Ticks every [data-countdown] on the page without hydrating anything else.
+  function tick() {
+    const now = Date.now();
+    for (const el of document.querySelectorAll("[data-countdown]")) {
+      const endsAt = Number((el as HTMLElement).dataset.endsAt ?? 0);
+      const ms = endsAt - now;
+      if (ms <= 0) {
+        el.textContent = "Offer ended";
+        continue;
+      }
+      const totalMinutes = Math.floor(ms / 60_000);
+      const days = Math.floor(totalMinutes / 1440);
+      const hours = Math.floor((totalMinutes % 1440) / 60);
+      const minutes = totalMinutes % 60;
+      el.textContent = days > 0 ? `Ends in ${days}d ${hours}h` : hours > 0 ? `Ends in ${hours}h ${minutes}m` : `Ends in ${minutes}m`;
+    }
+  }
+  tick();
+  setInterval(tick, 30_000);
+</script>
+
+<style>
+  .countdown {
+    font-size: var(--hv-type-small);
+    font-weight: 800;
+  }
+</style>

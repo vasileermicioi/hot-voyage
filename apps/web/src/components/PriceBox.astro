@@ -1,0 +1,98 @@
+---
+import type { HotOffer, Tour } from "@hot-voyage/db";
+import {
+  effectivePrice,
+  formatPrice,
+  formatSeatsLeft,
+  isHotOffer,
+  timeRemaining,
+} from "@hot-voyage/lib";
+import Countdown from "./Countdown.astro";
+import HotBadge from "./HotBadge.astro";
+
+interface Props {
+  tour: Tour;
+  offer: HotOffer | null;
+  now?: number;
+}
+
+const { tour, offer, now = Date.now() } = Astro.props;
+const hot = offer
+  ? isHotOffer(
+      {
+        status: tour.status,
+        featured: tour.featured,
+        discountPct: offer.discountPct,
+        startsAt: offer.startsAt,
+        endsAt: offer.endsAt,
+        seatsLeft: offer.seatsLeft,
+      },
+      now,
+    )
+  : false;
+const remaining = offer ? timeRemaining(offer.endsAt, now) : null;
+const price = offer
+  ? effectivePrice(tour.basePriceCents, offer.discountPct)
+  : tour.basePriceCents;
+---
+
+<aside class="hv-card price-box" aria-label="Price and booking">
+  <div class="price-box__row">
+    {hot && offer ? (
+      <HotBadge discountPct={offer.discountPct} />
+    ) : remaining?.ended ? (
+      <span class="hv-badge">Ended</span>
+    ) : offer && offer.seatsLeft <= 0 ? (
+      <span class="hv-badge">Full</span>
+    ) : null}
+  </div>
+  <p class="price-box__price">
+    {formatPrice(price, tour.currency ?? "USD")}
+    {offer && offer.discountPct > 0 && (
+      <s class="price-box__was">{formatPrice(tour.basePriceCents, tour.currency ?? "USD")}</s>
+    )}
+  </p>
+  {hot && offer && (
+    <p class="price-box__urgency">
+      <Countdown endsAt={offer.endsAt} now={now} /> · {formatSeatsLeft(offer.seatsLeft)}
+    </p>
+  )}
+  {!hot && remaining?.ended && <p class="price-box__note">This hot offer has ended.</p>}
+  {!hot && offer && offer.seatsLeft <= 0 && <p class="price-box__note">This tour is full — inquire to join the waitlist.</p>}
+  <a class="hv-button hv-button--sea" href="#inquire">Inquire now</a>
+  <p class="price-box__note">No payment — we reply within a day.</p>
+</aside>
+
+<style>
+  .price-box {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .price-box__row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .price-box__price {
+    margin: 0;
+    font-family: var(--hv-font-display);
+    font-size: 2rem;
+  }
+
+  .price-box__was {
+    margin-left: 0.625rem;
+    font-family: var(--hv-font-body);
+    font-size: var(--hv-type-body);
+    font-weight: 400;
+    opacity: 0.7;
+  }
+
+  .price-box__urgency,
+  .price-box__note {
+    margin: 0;
+    font-size: var(--hv-type-small);
+  }
+</style>

@@ -1,0 +1,118 @@
+---
+import type { HotOffer, Tour } from "@hot-voyage/db";
+import {
+  effectivePrice,
+  formatPrice,
+  formatSeatsLeft,
+  isHotOffer,
+  seatsUrgencyLevel,
+  timeRemaining,
+} from "@hot-voyage/lib";
+import Countdown from "./Countdown.astro";
+import HotBadge from "./HotBadge.astro";
+
+interface Props {
+  tour: Tour;
+  offer: HotOffer | null;
+  now?: number;
+}
+
+const { tour, offer, now = Date.now() } = Astro.props;
+const hot = offer
+  ? isHotOffer(
+      {
+        status: tour.status,
+        featured: tour.featured,
+        discountPct: offer.discountPct,
+        startsAt: offer.startsAt,
+        endsAt: offer.endsAt,
+        seatsLeft: offer.seatsLeft,
+      },
+      now,
+    )
+  : false;
+const remaining = offer ? timeRemaining(offer.endsAt, now) : null;
+const urgency = offer
+  ? seatsUrgencyLevel(offer.seatsLeft, offer.seatsTotal)
+  : null;
+const price = offer
+  ? effectivePrice(tour.basePriceCents, offer.discountPct)
+  : tour.basePriceCents;
+---
+
+<article class="hv-card tour-card">
+  <div class="tour-card__top">
+    {hot && offer ? (
+      <HotBadge discountPct={offer.discountPct} />
+    ) : remaining?.ended ? (
+      <span class="hv-badge">Ended</span>
+    ) : urgency === "full" ? (
+      <span class="hv-badge">Full</span>
+    ) : null}
+    <span class="tour-card__dest">{tour.destination}</span>
+  </div>
+  <h3 class="tour-card__title">
+    <a href={`/tours/${tour.slug}`}>{tour.title}</a>
+  </h3>
+  <p class="tour-card__meta">
+    {tour.durationDays} days · {formatPrice(price, tour.currency ?? "USD")}
+    {offer && offer.discountPct > 0 && (
+      <s class="tour-card__was">{formatPrice(tour.basePriceCents, tour.currency ?? "USD")}</s>
+    )}
+  </p>
+  {hot && offer && (
+    <p class="tour-card__urgency">
+      <Countdown endsAt={offer.endsAt} now={now} /> · {formatSeatsLeft(offer.seatsLeft)}
+    </p>
+  )}
+  <a class="hv-button" href={`/tours/${tour.slug}`}>View tour</a>
+</article>
+
+<style>
+  .tour-card {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .tour-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .tour-card__dest {
+    font-size: var(--hv-type-small);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .tour-card__title {
+    margin: 0;
+    font-family: var(--hv-font-display);
+    font-size: var(--hv-type-title);
+  }
+
+  .tour-card__title a {
+    color: inherit;
+  }
+
+  .tour-card__meta {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .tour-card__was {
+    margin-left: 0.5rem;
+    font-weight: 400;
+    opacity: 0.7;
+  }
+
+  .tour-card__urgency {
+    margin: 0;
+    font-size: var(--hv-type-small);
+  }
+</style>

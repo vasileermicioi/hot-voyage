@@ -1,0 +1,183 @@
+---
+/**
+ * Prerender decision (design open question, resolved): this page is
+ * server-rendered (`prerender = false`) so 03 admin edits are fresh without a
+ * rebuild. Reads D1 via `@hot-voyage/db` queries only — no raw D1 here.
+ */
+import { getTourBySlug, listRelated } from "@hot-voyage/db";
+import Gallery from "../../components/Gallery.astro";
+import InquiryForm from "../../components/InquiryForm.astro";
+import PriceBox from "../../components/PriceBox.astro";
+import TourCard from "../../components/TourCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { dbFromWorkerEnv, publicHostFromWorkerEnv } from "../../lib/request-db";
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+let detail: Awaited<ReturnType<typeof getTourBySlug>> = null;
+let related: Awaited<ReturnType<typeof listRelated>> = [];
+let notFound = false;
+try {
+  const db = dbFromWorkerEnv();
+  detail = await getTourBySlug(db, slug ?? "");
+  if (!detail || detail.tour.status !== "published") {
+    notFound = true;
+    detail = null;
+  } else {
+    related = await listRelated(db, detail.tour.id, 3);
+  }
+} catch {
+  notFound = true;
+}
+if (notFound || !detail) {
+  return new Response("Tour not found", { status: 404 });
+}
+const now = Date.now();
+const publicHost = publicHostFromWorkerEnv();
+const safeJson = (raw: string | null): string[] => {
+  try {
+    const parsed = JSON.parse(raw ?? "[]") as unknown;
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
+};
+const itinerary = safeJson(detail.tour.itineraryJson);
+const includes = safeJson(detail.tour.includesJson);
+const excludes = safeJson(detail.tour.excludesJson);
+---
+
+<BaseLayout title={detail.tour.title}>
+  <main class="detail">
+    <nav aria-label="Breadcrumb"><a href="/tours">← All tours</a></nav>
+    <div class="detail__head">
+      <div>
+        <p class="detail__dest">{detail.tour.destination} · {detail.tour.durationDays} days</p>
+        <h1 class="detail__title">{detail.tour.title}</h1>
+        <p class="detail__summary">{detail.tour.summary}</p>
+      </div>
+      <PriceBox tour={detail.tour} offer={detail.offer} now={now} />
+    </div>
+
+    <Gallery images={detail.images} title={detail.tour.title} publicHost={publicHost} variant="gallery" />
+
+    {itinerary.length > 0 && (
+      <section class="hv-card section" aria-label="Itinerary">
+        <h2>Itinerary</h2>
+        <ol class="timeline">
+          {itinerary.map((stop, i) => (
+            <li><strong>Day {i + 1}:</strong> {stop}</li>
+          ))}
+        </ol>
+      </section>
+    )}
+
+    {(includes.length > 0 || excludes.length > 0) && (
+      <section class="hv-card section" aria-label="What's included">
+        <h2>What's included</h2>
+        <div class="cols">
+          {includes.length > 0 && (
+            <div>
+              <h3>Included</h3>
+              <ul>{includes.map((item) => <li>{item}</li>)}</ul>
+            </div>
+          )}
+          {excludes.length > 0 && (
+            <div>
+              <h3>Not included</h3>
+              <ul>{excludes.map((item) => <li>{item}</li>)}</ul>
+            </div>
+          )}
+        </div>
+      </section>
+    )}
+
+    <InquiryForm tourId={detail.tour.id} tourTitle={detail.tour.title} />
+
+    {related.length > 0 && (
+      <section aria-label="Related tours">
+        <h2 class="section-title">You may also like</h2>
+        <div class="grid">
+          {related.map(({ tour, offer }) => (
+            <TourCard tour={tour} offer={offer} now={now} />
+          ))}
+        </div>
+      </section>
+    )}
+  </main>
+</BaseLayout>
+
+<style>
+  .detail {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .detail__head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 48rem) {
+    .detail__head {
+      grid-template-columns: 1fr 20rem;
+      align-items: start;
+    }
+  }
+
+  .detail__dest {
+    font-size: var(--hv-type-small);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0;
+  }
+
+  .detail__title {
+    font-family: var(--hv-font-display);
+    font-size: var(--hv-type-hero);
+    margin: 0.5rem 0;
+  }
+
+  .detail__summary {
+    margin: 0;
+    font-size: var(--hv-type-body);
+  }
+
+  .section {
+    padding: 1.5rem;
+  }
+
+  .section h2 {
+    margin-top: 0;
+    font-family: var(--hv-font-display);
+  }
+
+  .timeline {
+    display: grid;
+    gap: 0.625rem;
+    padding-left: 1.25rem;
+    margin: 0;
+  }
+
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 1rem;
+  }
+
+  .section-title {
+    font-family: var(--hv-font-display);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
+  }
+</style>

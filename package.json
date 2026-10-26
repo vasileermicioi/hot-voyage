@@ -16,9 +16,10 @@
     "format": "bunx @biomejs/biome@2.6.3 check --write .",
     "format:check": "bunx @biomejs/biome@2.6.3 check .",
     "test": "bun test",
-    "e2e": "bun e2e/smoke.ts",
+    "e2e": "bun e2e/run.ts",
     "db:generate": "bun --filter @hot-voyage/db db:generate",
     "db:migrate:local": "bun --filter @hot-voyage/db db:migrate:local",
+    "db:seed:local": "bun --filter @hot-voyage/db db:seed:local",
     "cf:deploy:dry": "bun --filter hot-voyage-web cf:deploy:dry"
   },
   "devDependencies": {

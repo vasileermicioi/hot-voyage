@@ -1,10 +1,162 @@
 ---
-import HelloCard from "../components/HelloCard.astro";
+import { listHotOffers, listTours } from "@hot-voyage/db";
+import TourCard from "../components/TourCard.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { dbFromWorkerEnv, publicHostFromWorkerEnv } from "../lib/request-db";
+
+export const prerender = false;
+
+let hot: Awaited<ReturnType<typeof listHotOffers>> = [];
+let featured: Awaited<ReturnType<typeof listTours>>["tours"] = [];
+let destinations: string[] = [];
+try {
+  const db = dbFromWorkerEnv();
+  hot = await listHotOffers(db, Date.now(), 6);
+  const pub = await listTours(db, { page: 1, pageSize: 24, sort: "hot" });
+  featured = pub.tours.slice(0, 3);
+  destinations = [...new Set(pub.tours.map((t) => t.tour.destination))].slice(
+    0,
+    6,
+  );
+} catch {
+  // Missing D1 binding (e.g., static build without wrangler): render shell.
+  hot = [];
+  featured = [];
+  destinations = [];
+}
+const now = Date.now();
+const _host = publicHostFromWorkerEnv();
+void _host;
 ---
 
-<BaseLayout title="Hello">
-  <main>
-    <HelloCard />
+<BaseLayout title="Hot offers">
+  <main class="home">
+    <section class="hv-card hero">
+      <span class="hv-badge">Hot offers, bold cards</span>
+      <h1 class="hero__title">Hot Voyage</h1>
+      <p class="hero__text">
+        Time-boxed, discounted tours with countdowns and seats-left urgency.
+        Find a hot offer before it ends.
+      </p>
+      <nav class="hero__links">
+        <a class="hv-button hv-button--sea" href="/tours">Browse all tours</a>
+        <a class="hv-button" href="/tours?hotOnly=1">Hot offers only</a>
+      </nav>
+    </section>
+
+    <section aria-label="Hot offers">
+      <h2 class="section-title">Hot right now</h2>
+      {hot.length > 0 ? (
+        <div class="rail">
+          {hot.map(({ tour, offer }) => (
+            <TourCard tour={tour} offer={offer} now={now} />
+          ))}
+        </div>
+      ) : (
+        <p class="hv-card empty">No hot offers right now — <a href="/tours">browse all tours</a>.</p>
+      )}
+    </section>
+
+    <section aria-label="Featured tours">
+      <h2 class="section-title">Featured</h2>
+      <div class="grid">
+        {featured.map(({ tour, offer }) => (
+          <TourCard tour={tour} offer={offer} now={now} />
+        ))}
+      </div>
+    </section>
+
+    {destinations.length > 0 && (
+      <section class="hv-card value" aria-label="Destinations">
+        <h2 class="section-title">Where to next?</h2>
+        <ul class="dest-list">
+          {destinations.map((d) => (
+            <li><a href={`/tours?destination=${encodeURIComponent(d)}`}>{d}</a></li>
+          ))}
+        </ul>
+      </section>
+    )}
   </main>
 </BaseLayout>
+
+<style>
+  .home {
+    display: grid;
+    gap: 2rem;
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .hero {
+    padding: 2.5rem 2rem;
+    text-align: left;
+  }
+
+  .hero__title {
+    font-family: var(--hv-font-display);
+    font-size: var(--hv-type-hero);
+    margin: 1rem 0 0.5rem;
+  }
+
+  .hero__text {
+    font-size: var(--hv-type-body);
+    max-width: 36rem;
+  }
+
+  .hero__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .section-title {
+    font-family: var(--hv-font-display);
+    font-size: var(--hv-type-title);
+    margin: 0 0 1rem;
+  }
+
+  .rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(16rem, 20rem);
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
+  }
+
+  .empty {
+    padding: 1.5rem;
+  }
+
+  .value {
+    padding: 1.5rem 2rem;
+  }
+
+  .dest-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .dest-list a {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    font-weight: 700;
+    background: var(--hv-sun-soft);
+    border: 2px solid var(--hv-ink);
+    border-radius: 999px;
+    color: var(--hv-ink);
+    text-decoration: none;
+  }
+</style>

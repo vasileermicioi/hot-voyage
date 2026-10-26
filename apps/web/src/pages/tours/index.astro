@@ -1,0 +1,118 @@
+---
+import { listTours, tours } from "@hot-voyage/db";
+import { eq } from "drizzle-orm";
+import Filters from "../../components/Filters.astro";
+import TourCard from "../../components/TourCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { parseToursQuery } from "../../lib/catalog-params";
+import { dbFromWorkerEnv } from "../../lib/request-db";
+
+export const prerender = false;
+
+const params = parseToursQuery(new URL(Astro.request.url).searchParams);
+let result = {
+  tours: [],
+  total: 0,
+  page: params.page,
+  pageSize: params.pageSize,
+  hotOnly: params.hotOnly,
+} as Awaited<ReturnType<typeof listTours>>;
+let destinations: string[] = [];
+let dbError = false;
+try {
+  const db = dbFromWorkerEnv();
+  result = await listTours(db, params);
+  const rows = await db
+    .select({ destination: tours.destination })
+    .from(tours)
+    .where(eq(tours.status, "published"));
+  destinations = [...new Set(rows.map((r) => r.destination))].sort();
+} catch {
+  dbError = true;
+}
+const now = Date.now();
+const totalPages = Math.max(1, Math.ceil(result.total / result.pageSize));
+const pageHref = (p: number) => {
+  const s = new URLSearchParams(new URL(Astro.request.url).searchParams);
+  s.set("page", String(p));
+  return `/tours?${s.toString()}`;
+};
+---
+
+<BaseLayout title="Tours">
+  <main class="listing">
+    <h1 class="listing__title">Tours</h1>
+    <Filters
+      search={params.search ?? ""}
+      destination={params.destination ?? ""}
+      destinations={destinations}
+      maxPrice={new URL(Astro.request.url).searchParams.get("maxPrice") ?? ""}
+      hotOnly={params.hotOnly}
+      sort={params.sort}
+    />
+    {dbError ? (
+      <p class="hv-card empty">Catalog is unavailable right now — try again soon.</p>
+    ) : result.tours.length > 0 ? (
+      <>
+        <p class="count" role="status">
+          {result.total} tour{result.total === 1 ? "" : "s"}
+          {params.hotOnly ? " · hot only" : ""}
+        </p>
+        <div class="grid">
+          {result.tours.map(({ tour, offer }) => (
+            <TourCard tour={tour} offer={offer} now={now} />
+          ))}
+        </div>
+        {totalPages > 1 && (
+          <nav class="pages" aria-label="Pagination">
+            {result.page > 1 && <a class="hv-button" href={pageHref(result.page - 1)}>← Prev</a>}
+            <span>Page {result.page} of {totalPages}</span>
+            {result.page < totalPages && <a class="hv-button" href={pageHref(result.page + 1)}>Next →</a>}
+          </nav>
+        )}
+      </>
+    ) : params.hotOnly ? (
+      <p class="hv-card empty">No hot offers right now — <a href="/tours">browse all tours</a>.</p>
+    ) : (
+      <p class="hv-card empty">No tours match those filters — <a href="/tours">reset filters</a>.</p>
+    )}
+  </main>
+</BaseLayout>
+
+<style>
+  .listing {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .listing__title {
+    font-family: var(--hv-font-display);
+    font-size: var(--hv-type-hero);
+    margin: 0;
+  }
+
+  .count {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
+  }
+
+  .empty {
+    padding: 1.5rem;
+  }
+
+  .pages {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 700;
+  }
+</style>

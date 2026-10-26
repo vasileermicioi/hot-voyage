@@ -10,13 +10,19 @@ model {
   siteAdmin = actor 'Site admin' 'Publishes offers and uploads WebP images from the browser'
 
   hotVoyage = system 'Hot Voyage' 'Touristic tours website for hot offers' {
-    webApp = container 'Astro edge app' 'Astro on Cloudflare Workers, pages and /api/*' 'Astro + Cloudflare Workers'
+    webApp = container 'Astro edge app' 'Astro on Cloudflare Workers, pages and /api/*' 'Astro + Cloudflare Workers' {
+      catalogPages = component 'Catalog pages' 'Home hot rail, /tours filters, /tours/[slug] detail + inquiry form' 'Astro + islands'
+      catalogApi = component 'Catalog API' 'GET /api/tours, POST /api/inquiries' 'Astro endpoints'
+    }
     database = container 'D1 database' 'Tours, offers, and inquiries storage' 'Cloudflare D1 + Drizzle'
     objectStore = container 'R2 image store' 'WebP tour images at tours/<slug>/<width>w.<ext>' 'Cloudflare R2'
     adminBrowser = container 'Admin browser' 'Auth-gated studio: CRUD, client-side WebP resize, upload' 'Astro islands'
 
     webApp -> database 'queries via @hot-voyage/db' 'D1 binding DB'
     webApp -> objectStore 'serves WebP images' 'R2 binding IMAGES'
+    catalogPages -> database 'listTours, getTourBySlug, listHotOffers, listRelated' 'D1 binding DB'
+    catalogPages -> objectStore 'gallery srcset 480/800/1200w WebP' 'R2 public host'
+    catalogApi -> database 'filtered tours, inquiry inserts' 'D1 binding DB'
     adminBrowser -> webApp 'CRUD and uploads via server endpoints' 'HTTPS'
   }
 

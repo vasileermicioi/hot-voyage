@@ -1,0 +1,104 @@
+---
+import type { TourSort } from "@hot-voyage/db";
+
+interface Props {
+  search?: string;
+  destination?: string;
+  destinations: string[];
+  maxPrice?: string;
+  hotOnly: boolean;
+  sort: TourSort;
+}
+
+const {
+  search = "",
+  destination = "",
+  destinations,
+  maxPrice = "",
+  hotOnly,
+  sort,
+} = Astro.props;
+---
+
+<form class="hv-card filters" method="get" action="/tours" role="search" aria-label="Filter tours">
+  <label class="filters__field">
+    Search
+    <input type="search" name="search" value={search} placeholder="Bali, Kyoto…" />
+  </label>
+  <label class="filters__field">
+    Destination
+    <select name="destination">
+      <option value="">All destinations</option>
+      {destinations.map((d) => (
+        <option value={d} selected={d === destination}>{d}</option>
+      ))}
+    </select>
+  </label>
+  <label class="filters__field">
+    Max price (USD)
+    <input type="number" name="maxPrice" min="0" step="50" value={maxPrice} placeholder="1500" />
+  </label>
+  <label class="filters__field">
+    Sort
+    <select name="sort">
+      <option value="hot" selected={sort === "hot"}>Hottest first</option>
+      <option value="ending" selected={sort === "ending"}>Ending soon</option>
+      <option value="price-asc" selected={sort === "price-asc"}>Price: low to high</option>
+      <option value="price-desc" selected={sort === "price-desc"}>Price: high to low</option>
+    </select>
+  </label>
+  <label class="filters__check">
+    <input type="checkbox" name="hotOnly" value="1" checked={hotOnly} />
+    Hot offers only
+  </label>
+  <button class="hv-button hv-button--sea" type="submit">Apply</button>
+  <a class="hv-button" href="/tours">Reset</a>
+</form>
+
+<style>
+  .filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 0.75rem;
+    padding: 1rem;
+    align-items: end;
+  }
+
+  .filters__field {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+    font-size: var(--hv-type-small);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .filters__field input,
+  .filters__field select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 0.5rem 0.625rem;
+    font-size: var(--hv-type-body);
+    font-weight: 400;
+    border: 2px solid var(--hv-ink);
+    border-radius: 6px;
+    background: #fff;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .filters__check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+  }
+
+  .filters__check input {
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: var(--hv-sea);
+  }
+</style>

@@ -43,6 +43,22 @@ bun run dev                                         # http://localhost:4321
 - Preview/prod bindings use the `preview` / `production` envs in the same file.
   Prod D1/R2 ids are provisioned in step 04.
 
+## Catalog data (D1)
+
+```sh
+bun run db:generate        # after editing packages/db/src/schema.ts
+bun run db:migrate:local   # apply to local D1 (wrangler --local)
+bun run db:seed:local      # idempotent seed: 10 tours, 4 active hot offers
+```
+
+- Seed is **local-only and idempotent** (upsert by slug; safe to re-run).
+- **Never auto-seed prod.** Remote seed is a manual, reviewed command owned by
+  step 04 (launch): apply migrations with
+  `wrangler d1 migrations apply hot-voyage-prod --remote`, then run a reviewed
+  seed explicitly — CI never seeds prod.
+- Browse: `/` (hot rail) → `/tours` (filters) → `/tours/<slug>` (detail + inquiry).
+- APIs: `GET /api/tours`, `POST /api/inquiries`, `GET /api/health`.
+
 ## Project layout
 
 ```text

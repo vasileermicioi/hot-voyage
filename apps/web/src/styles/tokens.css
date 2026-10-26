@@ -11,8 +11,8 @@
 
   /* Neobrutalist geometry: thick borders, hard shadows, small radius. */
   --hv-border: 3px solid var(--hv-ink);
-  --hv-shadow: 6px 6px 0 var(--hv-ink);
-  --hv-shadow-small: 3px 3px 0 var(--hv-ink);
+  --hv-shadow: 2px 2px 0 var(--hv-ink);
+  --hv-shadow-small: 2px 2px 0 var(--hv-ink);
   --hv-radius: 8px;
 
   --hv-font-display: "Archivo Black", "Arial Black", system-ui, sans-serif;
@@ -63,7 +63,7 @@ body {
 }
 
 .hv-button:active {
-  transform: translate(3px, 3px);
+  transform: translate(2px, 2px);
   box-shadow: none;
 }
 

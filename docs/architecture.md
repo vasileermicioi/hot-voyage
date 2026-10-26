@@ -25,16 +25,32 @@ Workers + D1 + R2 with Astro + TypeScript + Drizzle, managed with Bun.
 Request flow: browser → Workers (Astro) → `packages/lib` env/validation →
 `packages/db` queries → D1; images served from R2 via public host.
 
-## Component (C3, foundation slice)
+## Component (C3, catalog slice)
 
-- `apps/web/src/pages/index.astro` → `layouts/BaseLayout.astro` →
-  `components/HelloCard.astro` on `styles/tokens.css`.
-- `apps/web/src/pages/api/health.ts` → `probeBindings()` from
-  `@hot-voyage/lib` → `{ ok, hasD1, hasR2 }`, no secrets.
-- `packages/lib/src/env.ts`: `probeBindings()` (non-throwing) plus throwing
-  `getDb()`/`getBucket()` for query/mutation paths.
-- `packages/db/src/`: `client.ts` (`createD1Client` + `createLocalClient`
-  over `bun:sqlite`), `schema.ts` (probe table; tours tables land in step 02).
+- `apps/web/src/pages/index.astro` (server-rendered): hero + hot-offers rail
+  (`listHotOffers`) + featured + destinations, via `TourCard` (`HotBadge` +
+  `Countdown` island) on `styles/tokens.css`.
+- `apps/web/src/pages/tours/index.astro` (server-rendered): `Filters` form
+  (GET, URL-synced) + server `listTours` + pagination + hot-only empty state.
+- `apps/web/src/pages/tours/[slug].astro` (server-rendered — freshness over
+  rebuild; see file header): `Gallery` (R2 `srcset` 480/800/1200w WebP),
+  itinerary timeline, includes/excludes, `PriceBox`, `InquiryForm`, related rail.
+- `apps/web/src/pages/api/tours.ts` → `parseToursQuery` + `listTours` via
+  `getDb()` → `{ tours, total, page, pageSize, hotOnly }`.
+- `apps/web/src/pages/api/inquiries.ts` → shared `validateInquiry` + honeypot +
+  rate-limit stub → 201 `{ id }` / 400 `{ error, fields }` / 429.
+- `packages/lib/src/`: `offers.ts` (single `isHot` truth), `format.ts`,
+  `validation.ts` (shared inquiry schema), `images.ts` (R2 URL + `srcset`,
+  widths 480/800/1200 locked), `api-error.ts` + `rate-limit.ts` + `catalog-params.ts`.
+- `packages/db/src/`: `client.ts` (Workers D1) + `local.ts` (Bun-only sqlite),
+  `schema.ts` (`tours`, `hot_offers`, `tour_images`, `inquiries` + probe),
+  `queries.ts` (`listTours`, `getTourBySlug`, `listHotOffers`, `listRelated`),
+  `seed.ts` (idempotent local seed, never prod).
+
+Foundation (01) pieces kept: `api/health.ts` → `{ ok, hasD1, hasR2 }`,
+`layouts/BaseLayout.astro`, tokens, LikeC4 shell. Home no longer renders
+`HelloCard` — it renders the catalog hero + hot rail (`HelloCard.astro` file
+retained but unused by routes).
 
 ADRs live in `AGENTS.md` (stack pins, data-access/mutation rule, image/WebP
 rule, CF deploy rule). Design tokens live in `docs/design.md`.

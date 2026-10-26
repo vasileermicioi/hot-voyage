@@ -1,0 +1,21 @@
+---
+interface Props {
+  discountPct: number;
+}
+
+const { discountPct } = Astro.props;
+---
+
+{discountPct > 0 && (
+  <span class="hv-badge hot-badge" data-hot-badge>
+    Hot −{discountPct}%
+  </span>
+)}
+
+<style>
+  .hot-badge {
+    background: var(--hv-coral);
+    color: #fff;
+    border-color: var(--hv-ink);
+  }
+</style>

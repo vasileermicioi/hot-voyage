@@ -1,0 +1,172 @@
+---
+interface Props {
+  tourId: string;
+  tourTitle: string;
+}
+
+const { tourId, tourTitle } = Astro.props;
+---
+
+<form
+  id="inquire"
+  class="hv-card inquiry"
+  data-inquiry-form
+  data-tour-id={tourId}
+  aria-label={`Inquire about ${tourTitle}`}
+  novalidate
+>
+  <h2 class="inquiry__title">Inquire about this tour</h2>
+  <p class="inquiry__note">No payment — we reply within a day.</p>
+  <label class="inquiry__field">
+    Name
+    <input type="text" name="name" autocomplete="name" required minlength="2" />
+    <span class="inquiry__error" data-error="name"></span>
+  </label>
+  <label class="inquiry__field">
+    Email or phone
+    <input type="text" name="contact" autocomplete="email" required minlength="3" />
+    <span class="inquiry__error" data-error="contact"></span>
+  </label>
+  <label class="inquiry__field">
+    Party size
+    <input type="number" name="partySize" min="1" max="20" value="2" required />
+    <span class="inquiry__error" data-error="partySize"></span>
+  </label>
+  <label class="inquiry__field">
+    Message <span class="inquiry__optional">(optional)</span>
+    <textarea name="message" rows="4" maxlength="2000"></textarea>
+    <span class="inquiry__error" data-error="message"></span>
+  </label>
+  {/* Honeypot: hidden from humans, trips bots. Label + name avoid
+      autofill vocabulary ("Company" got autofilled); values the browser
+      itself autofilled are cleared on submit (see script). */}
+  <label class="inquiry__honeypot" aria-hidden="true">
+    Website
+    <input
+      type="text"
+      name="website"
+      tabindex="-1"
+      autocomplete="off"
+      aria-hidden="true"
+    />
+  </label>
+  <button class="hv-button hv-button--sea" type="submit" data-submit>Send inquiry</button>
+  <p class="inquiry__status" data-status role="status" aria-live="polite"></p>
+</form>
+
+<script>
+  // Progressive enhancement: fetch-POSTs JSON to /api/inquiries, shows
+  // inline field errors and a success state without a page reload.
+  const form = document.querySelector("[data-inquiry-form]");
+  if (form instanceof HTMLFormElement) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const status = form.querySelector("[data-status]");
+      const submit = form.querySelector("[data-submit]");
+      for (const slot of form.querySelectorAll("[data-error]")) slot.textContent = "";
+      if (status) status.textContent = "Sending…";
+      if (submit instanceof HTMLButtonElement) submit.disabled = true;
+      try {
+        const data = new FormData(form);
+        // Browser autofill ignores autocomplete="off" on hidden fields; a
+        // value the browser filled itself (not typed, not bot-set) must not
+        // trip the honeypot. :autofill only matches browser-filled values.
+        const hp = form.querySelector('input[name="website"]');
+        let honeypot = "";
+        if (hp instanceof HTMLInputElement) {
+          let autofilled = false;
+          try {
+            autofilled = hp.matches(":autofill");
+          } catch {
+            autofilled = false;
+          }
+          honeypot = autofilled ? "" : hp.value;
+        }
+        const res = await fetch("/api/inquiries", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            tourId: form.dataset.tourId,
+            name: String(data.get("name") ?? ""),
+            contact: String(data.get("contact") ?? ""),
+            partySize: Number(data.get("partySize") ?? 2),
+            message: String(data.get("message") ?? ""),
+            honeypot,
+          }),
+        });
+        const body = (await res.json()) as { id?: string; error?: string; fields?: Record<string, string> };
+        if (!res.ok) {
+          for (const [field, message] of Object.entries(body.fields ?? {})) {
+            const slot = form.querySelector(`[data-error="${CSS.escape(field)}"]`);
+            if (slot) slot.textContent = message;
+          }
+          if (status) status.textContent = body.error ?? "Something went wrong.";
+        } else {
+          form.reset();
+          if (status) status.textContent = "Inquiry sent — we reply within a day.";
+        }
+      } catch {
+        if (status) status.textContent = "Network error — try again.";
+      } finally {
+        if (submit instanceof HTMLButtonElement) submit.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .inquiry {
+    padding: 1.5rem;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .inquiry__title {
+    margin: 0;
+    font-family: var(--hv-font-display);
+  }
+
+  .inquiry__note {
+    margin: 0;
+    font-size: var(--hv-type-small);
+  }
+
+  .inquiry__field {
+    display: grid;
+    gap: 0.25rem;
+    font-weight: 700;
+  }
+
+  .inquiry__field input,
+  .inquiry__field textarea {
+    padding: 0.5rem 0.625rem;
+    font-size: var(--hv-type-body);
+    font-weight: 400;
+    border: 2px solid var(--hv-ink);
+    border-radius: 6px;
+    background: #fff;
+  }
+
+  .inquiry__optional {
+    font-weight: 400;
+    opacity: 0.7;
+  }
+
+  .inquiry__error {
+    min-height: 1em;
+    font-size: var(--hv-type-small);
+    font-weight: 700;
+    color: #a31621;
+  }
+
+  .inquiry__honeypot {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+  }
+
+  .inquiry__status {
+    margin: 0;
+    font-weight: 700;
+  }
+</style>

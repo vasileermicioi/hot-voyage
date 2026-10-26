@@ -7,7 +7,7 @@
 ## What we kept from neobrutalism.dev
 
 - Thick uniform borders (`3px solid ink`) on every surface and control.
-- Hard offset shadows with no blur (`6px 6px 0` cards, `3px 3px 0` buttons).
+- Hard offset shadows with no blur (`2px 2px 0` on cards and buttons).
 - Small radius (`8px` cards, `999px` pills only for badges).
 - Press-down button interaction (`translate(3px,3px)` + shadow removed on `:active`).
 - Uppercase, letter-spaced badges.
@@ -35,8 +35,8 @@
 | `--hv-ink`          | `#1a1a1a`                  | Borders, shadows, text    |
 | `--hv-paper`        | `#fffdf7`                  | Card surfaces             |
 | `--hv-border`       | `3px solid var(--hv-ink)`  | All component borders     |
-| `--hv-shadow`       | `6px 6px 0 var(--hv-ink)`  | Card shadow               |
-| `--hv-shadow-small` | `3px 3px 0 var(--hv-ink)`  | Button/chip shadow        |
+| `--hv-shadow`       | `2px 2px 0 var(--hv-ink)`  | Card shadow               |
+| `--hv-shadow-small` | `2px 2px 0 var(--hv-ink)`  | Button/chip shadow        |
 | `--hv-radius`       | `8px`                      | Card/button radius        |
 | `--hv-type-hero`    | `clamp(2rem, 5vw, 3.5rem)` | Page/hero titles          |
 | `--hv-type-title`   | `1.5rem`                   | Card titles               |
