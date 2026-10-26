@@ -35,6 +35,17 @@
       "bucket_name": "hot-voyage-images-dev"
     }
   ],
+  // Pinned id of the auto-provisioned "hot-voyage-session" KV namespace.
+  // The adapter injects an id-less SESSION entry when none is declared,
+  // which makes every deploy try to re-create the namespace (error 10014).
+  // Declaring it here makes the adapter back off (see cloudflareConfigCustomizer).
+  // Preview/production envs need their own KV ids when provisioned (step 04).
+  "kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "4b01a2425abf402fa423c039541b9c88"
+    }
+  ],
   "env": {
     "preview": {
       "d1_databases": [
